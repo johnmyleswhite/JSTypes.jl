@@ -49,9 +49,15 @@ function makekwfunc(typename::Symbol, spec::Vector{Tuple})
 end
 
 function makehash(fieldname::Symbol)
-    return Expr(:(=),
-                Expr(:ref, :res, string(fieldname)),
-                Expr(:call, :tojs, Expr(:., :x, Expr(:quote, fieldname))))
+    if fieldname == :_type
+        return Expr(:(=),
+                    Expr(:ref, :res, "type"),
+                    Expr(:call, :tojs, Expr(:., :x, Expr(:quote, fieldname))))
+    else
+        return Expr(:(=),
+                    Expr(:ref, :res, string(fieldname)),
+                    Expr(:call, :tojs, Expr(:., :x, Expr(:quote, fieldname))))
+    end
 end
 
 # Define translation of type to JSON-ready data structure
@@ -80,7 +86,8 @@ end
 function maketojs(typename::Symbol, spec::Vector{Tuple})
     return Expr(:function,
                 Expr(:call,
-                     Expr(:., :JSTypes, Expr(:quote, :tojs)),
+                     # Expr(:., :JSTypes, Expr(:quote, :tojs)),
+                     :tojs,
                      Expr(:(::), :x, typename)),
                 makejsbody(spec))
 end
@@ -104,15 +111,15 @@ function makecopy(typename::Symbol, spec::Vector{Tuple})
                 makecopybody(typename, spec))
 end
 
-# Use macro to force evaluation
-macro jstype(typename, s)
-    spec = eval(s)
-    if !isvalidspec(spec)
-        error("Cannot construct invalid type specification")
-    end
-    ex1 = maketype(typename, spec)
-    ex2 = makekwfunc(typename, spec)
-    ex3 = maketojs(typename, spec)
-    ex4 = maketojs(typename, spec)
-    return Expr(:block, ex1, ex2, ex3, ex4)
-end
+# # Use macro to force evaluation
+# macro jstype(typename, s)
+#     spec = eval(s)
+#     if !isvalidspec(spec)
+#         error("Cannot construct invalid type specification")
+#     end
+#     ex1 = maketype(typename, spec)
+#     ex2 = makekwfunc(typename, spec)
+#     ex3 = maketojs(typename, spec)
+#     ex4 = maketojs(typename, spec)
+#     return Expr(:block, ex1, ex2, ex3, ex4)
+# end
