@@ -1,6 +1,12 @@
 JSTypes.jl
 ==========
 
+# NOTICE
+
+**This package is unmaintained. Its reliability is not guaranteed.**
+
+# Introduction
+
 Mimic Javascript objects using Julian types
 
 Often, one needs to write Julia code that interacts with Javascript. Javascript's approximation of a type system essentially places the fields of a struct inside of a hash. Instead of explicitly representing `NULL` values, the hash will often have no entry for a given key.
