@@ -9,7 +9,7 @@ function isvalidentry(entry::Tuple)
     end
 end
 
-function isvalidspec(spec::Vector{Tuple})
+function isvalidspec(spec)
     for entry in spec
         if !isvalidentry(entry)
             return false
@@ -26,7 +26,7 @@ function fielddef(entry::Tuple)
     end
 end
 
-function maketype(typename::Symbol, spec::Vector{Tuple})
+function maketype(typename::Symbol, spec)
     n = length(spec)
     lines = Array(Expr, n)
     for i in 1:n
@@ -38,7 +38,7 @@ end
 
 # Build up a constructor that takes in all fields for a type
 # as keyword args using defaults
-function makekwfunc(typename::Symbol, spec::Vector{Tuple})
+function makekwfunc(typename::Symbol, spec)
     return Expr(:function,
                 Expr(:call, typename,
                      Expr(:parameters,
@@ -70,20 +70,20 @@ function makejsline(entry::Tuple)
                          :!=,
                          :nothing),
                     Expr(:block, makehash(fieldname)))
-                         
+
     else
         return makehash(fieldname)
     end
 end
 
-function makejsbody(spec::Vector{Tuple})
+function makejsbody(spec)
     return Expr(:block,
                 :(res = Dict()),
                 map(makejsline, spec)...,
                 :(return res))
 end
 
-function maketojs(typename::Symbol, spec::Vector{Tuple})
+function maketojs(typename::Symbol, spec)
     return Expr(:function,
                 Expr(:call,
                      # Expr(:., :JSTypes, Expr(:quote, :tojs)),
@@ -96,14 +96,14 @@ function makecopyline(entry::Tuple)
     return Expr(:call, :copy, Expr(:., :x, Expr(:quote, entry[1])))
 end
 
-function makecopybody(typename::Symbol, spec::Vector{Tuple})
+function makecopybody(typename::Symbol, spec)
     return Expr(:block,
                 Expr(:call,
                      typename,
                      map(makecopyline, spec)...))
 end
 
-function makecopy(typename::Symbol, spec::Vector{Tuple})
+function makecopy(typename::Symbol, spec)
     return Expr(:function,
                 Expr(:call,
                      Expr(:., :Base, Expr(:quote, :copy)),
